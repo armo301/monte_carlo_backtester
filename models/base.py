@@ -38,7 +38,6 @@ class BaseModel(ABC):
         """
         pass
 
-    @abstractmethod
     def simulate_path(self, S0: float, n_steps: int) -> np.ndarray:
         """
         Simulates a full price path by calling step() repeatedly
