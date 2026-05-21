@@ -34,6 +34,24 @@ class GBM(BaseModel):
         return current_price * np.exp((self.mu - 0.5 * self.sigma**2) * self.dt
                                        + self.sigma * np.sqrt(self.dt) * epsilon)
     
+    def simulate_paths(self, S0: float, n_steps: int, n_sims: int) -> np.ndarray:
+        """
+        Vectorized simulation of multiple paths simultaneously
+        Returns array of shap (n_sims, n_steps + 1)
+        Vectorized matrix more efficient than calling simulate_path() n times
+        """
+        epsilon = np.random.standard_normal((n_sims, n_steps)) #Draws entire matrix
+
+        daily_returns = ((self.mu - 0.5 * self.sigma**2) * self.dt
+                            + self.sigma * np.sqrt(self.dt) * epsilon) 
+        
+        price_relatives = np.exp(daily_returns)
+        paths = S0 * np.concatenate([np.ones((n_sims, 1)), 
+                                     np.cumprod(price_relatives, axis=1)], 
+                                     axis=1) #all the simulation paths computed
+        
+        return paths
+    
     def __repr__(self):
         return (f"GBM(mu={self.mu: .4f}, sigma={self.sigma: .4f}, dt={self.dt})"
                 if self.mu is not None
