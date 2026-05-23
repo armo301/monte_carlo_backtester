@@ -8,7 +8,7 @@ class GBM(BaseModel):
 
     Discretized step:
         S(t+dt) = S(t) * exp((mu - 0.5*sigma^2)*dt + sigma*sqrt(dt)*epsilon)
-        epsilon ~ N(0,1)
+        -> epsilon ~ N(0,1)
     """
 
     def __init__(self, dt: float = 1 / 252):
