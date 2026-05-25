@@ -181,7 +181,8 @@ def print_summary(summary: dict, S0: float, confidence: float = 0.95) -> None:
           f"(${summary['var'] * S0:,.2f})")
     print(f"  CVaR:                {summary['cvar']:>8.2%}  "
           f"(${summary['cvar'] * S0:,.2f})")
-    print(f"  Sharpe Ratio:        {summary['sharpe']:>8.2f}")
+    print(f"  Sharpe Ratio:        {summary['sharpe']:>8.2f}  "
+      f"(strategy mode only -- requires daily return stream)")
 
     print(f"\n  MAX DRAWDOWN DISTRIBUTION")
     print(f"  Mean:                {summary['max_drawdown']['mean']:>8.2%}")
