@@ -90,3 +90,37 @@ def generate_synthetic_returns(mu: float, sigma: float,
     }
 
     return returns, prices, info
+
+def load_returns_from_csv(filepath: str) -> tuple:
+    """
+    Loads strategy returns from a CSV file for Use Case 2.
+    CSV should have one column of decimal returns (e.g. 0.0082, -0.0043).
+
+    Parameters:
+        filepath: str -> path to CSV file.
+
+    Returns:
+        tuple: (returns, info)
+        returns: np.ndarray of log returns
+        info: dict with metadata
+    """
+    df = pd.read_csv(filepath, header=None)
+    returns = df.iloc[:, 0].values.astype(float)
+
+    info = {
+        'ticker':      filepath.split('/')[-1].replace('.csv', '').upper(),
+        'period':      f'{len(returns)} days',
+        'n_days':      len(returns),
+        'start_date':  'N/A',
+        'end_date':    'N/A',
+        'start_price': 100.0,
+        'end_price':   100.0,
+        'mean_return': np.mean(returns),
+        'volatility':  np.std(returns, ddof=1) * np.sqrt(252)
+    }
+
+    print(f"Loaded {len(returns)} days of returns from {filepath}")
+    print(f"Mean return: {info['mean_return']:.6f} | "
+          f"Annualized vol: {info['volatility']:.2%}")
+
+    return returns, info
