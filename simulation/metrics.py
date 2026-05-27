@@ -95,26 +95,52 @@ def max_drawdown_distribution(paths: np.ndarray) -> dict:
 def sharpe_ratio(returns: np.ndarray, risk_free_rate: float = 0.05,
                  dt: float = 1/252) -> float:
     """
-    Computes annualized Sharpe Ratio from a sequence of period returns
-    Used when a trading strategy produces a time series of returns
-
-    Sharpe = (mean_return - risk_free_rate) / std_return
-    Both mean and std are annualized
+    Computes annualized Sharpe ratio from a sequence of period returns
 
     Parameters:
-        returns : np.ndarray
-            ->Time series of period returns (e.g. daily returns from a strategy)
-        risk_free_rate : float 
-            ->Annualized risk free rate. Default 0.05 (5% ~ current T-bill rate)
-        dt : float -> Length of one period in years. Default 1/252 (one trading day)
+        returns : np.ndarray 
+            -> time series of period returns (e.g. daily returns from one path)
+        risk_free_rate: float -> annualized risk free rate
+        dt: float -> length of one period in years
 
     Returns:
         float -> annualized Sharpe ratio
     """
-    mean_return = np.mean(returns) / dt
-    std_return = np.std(returns, ddof=1) / np.sqrt(dt)
-    return (mean_return - risk_free_rate) / std_return
+    excess_returns = returns - risk_free_rate * dt
+    mean_excess = np.mean(excess_returns)
+    std_returns = np.std(returns, ddof=1)
 
+    if std_returns == 0:
+        return 0.0
+
+    return (mean_excess / std_returns) * np.sqrt(1 / dt)
+
+
+def sharpe_ratio_mc(paths: np.ndarray, risk_free_rate: float = 0.05,
+                    dt: float = 1/252) -> float:
+    """
+    Computes median Sharpe Ratio across all simulated paths
+    More meaningful than a single Sharpe for Monte Carlo output
+
+    Computes Sharpe for each individual path, then returns the median
+    across all simulations
+
+    Parameters:
+        paths: np.ndarray -> shape (n_sims, n_steps + 1).
+        risk_free_rate: float -> annualized risk free rate.
+        dt: float -> time step in years.
+
+    Returns:
+        float -> median annualized Sharpe Ratio across all simulated paths.
+    """
+    sharpes = []
+
+    for path in paths:
+        daily_returns = np.diff(np.log(path))
+        s = sharpe_ratio(daily_returns, risk_free_rate, dt)
+        sharpes.append(s)
+
+    return float(np.median(sharpes))
 
 def summarize(paths: np.ndarray, risk_free_rate: float = 0.05,
               confidence: float = 0.95) -> dict:
@@ -139,7 +165,7 @@ def summarize(paths: np.ndarray, risk_free_rate: float = 0.05,
         'std_return':     np.std(returns),
         'var':            var(returns, confidence),
         'cvar':           cvar(returns, confidence),
-        'sharpe':         sharpe_ratio(returns, risk_free_rate),
+        'sharpe':         sharpe_ratio_mc(paths, risk_free_rate),
         'max_drawdown': {
             'mean':   dd['mean'],
             'median': dd['median'],
@@ -182,7 +208,7 @@ def print_summary(summary: dict, S0: float, confidence: float = 0.95) -> None:
     print(f"  CVaR:                {summary['cvar']:>8.2%}  "
           f"(${summary['cvar'] * S0:,.2f})")
     print(f"  Sharpe Ratio:        {summary['sharpe']:>8.2f}  "
-      f"(strategy mode only -- requires daily return stream)")
+      f"(median across all simulated paths)")
 
     print(f"\n  MAX DRAWDOWN DISTRIBUTION")
     print(f"  Mean:                {summary['max_drawdown']['mean']:>8.2%}")

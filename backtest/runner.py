@@ -1,7 +1,6 @@
 import numpy as np
 from backtest.strategy import BaseStrategy
-from simulation.metrics import summarize, print_summary, sharpe_ratio
-
+from simulation.metrics import summarize, print_summary, sharpe_ratio, sharpe_ratio_mc
 
 class BacktestResult:
     """
@@ -15,8 +14,7 @@ class BacktestResult:
         benchmark: summary of buy and hold for comparison
     """
 
-    def __init__(self, strategy, pnl_paths, strategy_returns,
-                 summary, benchmark):
+    def __init__(self, strategy, pnl_paths, strategy_returns, summary, benchmark):
         self.strategy         = strategy
         self.pnl_paths        = pnl_paths
         self.strategy_returns = strategy_returns
@@ -75,7 +73,7 @@ class BacktestRunner:
     def run(self, paths: np.ndarray, strategy: BaseStrategy,
             S0: float, confidence: float = 0.95) -> BacktestResult:
         """
-        Runs strategy on every simulated path and computes metrics.
+        Runs strategy on every simulated path and computes metrics
 
         Parameters:
             paths: np.ndarray -> shape (n_sims, n_steps + 1), simulated price paths
@@ -105,9 +103,7 @@ class BacktestRunner:
 
         # Compute Sharpe correctly using daily return stream
         # Average daily returns across all simulations then annualize
-        mean_daily_returns = np.mean(strategy_returns, axis=0)
-        summary['sharpe'] = sharpe_ratio(
-            mean_daily_returns, self.risk_free_rate, self.dt
+        summary['sharpe'] = sharpe_ratio_mc(pnl_paths, self.risk_free_rate, self.dt
         )
 
         # Run buy and hold as benchmark for comparison
@@ -178,12 +174,6 @@ class BacktestRunner:
         summary = summarize(bah_pnl, self.risk_free_rate, confidence)
 
         # Compute Sharpe for benchmark too
-        bah_returns = np.array([
-            np.diff(np.log(bah_pnl[i])) for i in range(n_sims)
-        ])
-        mean_daily = np.mean(bah_returns, axis=0)
-        summary['sharpe'] = sharpe_ratio(
-            mean_daily, self.risk_free_rate, self.dt
-        )
+        summary['sharpe'] = sharpe_ratio_mc(bah_pnl, self.risk_free_rate, self.dt)
 
         return summary
