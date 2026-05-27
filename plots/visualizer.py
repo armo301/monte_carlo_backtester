@@ -57,7 +57,7 @@ def _plot_fan_chart(ax, paths: np.ndarray, info: dict, config) -> None:
     # Plot random sample of paths in light gray
     sample_idx = np.random.choice(n_sims, size=min(200, n_sims), replace=False)
     for idx in sample_idx:
-        ax.plot(t, paths[idx], color='lightgray', alpha=0.3, linewidth=0.5)
+        ax.plot(t, paths[idx], color='gray', alpha=0.4, linewidth=0.5)
 
     # Plot percentile bands
     p5  = np.percentile(paths, 5,  axis=0)
