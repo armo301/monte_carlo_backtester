@@ -1,11 +1,11 @@
 # Monte Carlo Backtester
 
-Monte Carlo simulator with multiple stochastic models (GBM, Jump-Diffusion, GARCH) for return simulation, as well as bootstrap model. 
+Monte Carlo simulator simulating individual stocks, ETFs, etc. with multiple stochastic models (GBM, Jump-Diffusion, GARCH) for return simulation, as well as bootstrap model. User is able to input their own strategy (add as a class in backtest/strategy.py) and compare with baseline strategy (either inputted or from provided trading strategies). 
 
 Computes quantitative risk metrics, eg. Sharpe ratio, VaR, CVaR
 Also returns return and max drawdown distributions.
 
-Can use real data through yfinance or synthetic data by inputting mu (expected return) and sigma (volatility).
+Can use real data through yfinance (ticker input) or synthetic data created by simulator by inputting mu (expected return) and sigma (volatility).
 
 Provides 3 sample trading strategies: buy and hold (common baseline), SMA (momentum trading), mean reversion.
 ## Sample Usage
