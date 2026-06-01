@@ -1,47 +1,36 @@
 # Monte Carlo Backtester
 
-A Monte Carlo simulation engine for backtesting trading strategies, built in Python.
-Supports multiple stochastic models for return simulation and computes standard quantitative risk metrics.
+Monte Carlo simulator with multiple stochastic models (GBM, Jump-Diffusion, GARCH) for return simulation, as well as bootstrap model. 
 
-## Models
-- **Geometric Brownian Motion (GBM)** — continuous diffusion baseline (Black-Scholes)
-- **Merton Jump-Diffusion** — GBM with Poisson-distributed price jumps for tail risk
-- **GARCH(1,1)** — time-varying volatility with clustering effects
-- **Historical Bootstrap** — non-parametric resampling of empirical return distributions
+Computes quantitative risk metrics, eg. Sharpe ratio, VaR, CVaR
+Also returns return and max drawdown distributions.
 
-## Risk Metrics
-- **Sharpe Ratio**
-- **Value at Risk (VaR)** — parametric and historical
-- **Conditional VaR (CVaR / Expected Shortfall)**
-- **Maximum Drawdown**
+Can use real data through yfinance or synthetic data by inputting mu (expected return) and sigma (volatility).
 
-## Data Sources
-- **Live data**: Yahoo Finance via `yfinance`
-- **Synthetic**: Parameterized return generation for model testing
+Provides 3 sample trading strategies: buy and hold (common baseline), SMA (momentum trading), mean reversion.
+## Sample Usage
 
-## Usage
 ```bash
-python -m cli.main --ticker AAPL --model gbm --sims 10000 --days 252
+# Simulate AAPL using GARCH, 10,000 paths, one trading year
+python -m cli.main --ticker AAPL --model garch --sims 10000 --days 252
+
+python -m cli.main --ticker AAPL --model jump --sims 10000 --days 252 --strategy sma
+
+# Synthetic mode (input mu and sigma)
+python -m cli.main --mu 0.10 --sigma 0.20 --model gbm --sims 10000 --days 252
+
+python -m cli.main --returns my_strategy.csv --model bootstrap --sims 10000
+
+# See all options
+python -m cli.main --help
 ```
 
 ## Setup
+
 ```bash
+git clone https://github.com/armo301/monte-carlo-backtester.git
+cd monte-carlo-backtester
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-
-## Project Structure
-monte-carlo-backtester/
-├── data/           # Data fetching and synthetic generation
-├── models/         # Stochastic return models
-├── simulation/     # Monte Carlo engine and risk metrics
-├── backtest/       # Strategy runner and base strategy class
-├── cli/            # Command-line entry point
-├── plots/          # Visualization
-└── tests/          # Unit tests
-
-## Background
-This project was built to explore stochastic modeling of financial returns.
-The mathematical foundation is Itô calculus — specifically the connection between
-physical Brownian motion and geometric diffusion processes in asset pricing.
